@@ -1,5 +1,9 @@
 import numpy as np
-#somewht amazingly, THIS IS IT!? This is ALL you need for a fully fledged minimal HMC implementation. Very simple. Nice.
+
+# Implementation of hamiltonian MCMC scheme based on this paper https://arxiv.org/abs/1701.02434
+#The MCMC sampler integrates hamiltons equations of motion within an augmented space with additional auxiliary variables. This effectively makes the sampler follow the gradient, but with momentum
+#which keeps it falling directly into the gradient mode.
+
 def hamiltonian_MCMC(n_samples, dVdq,initial_position, path_length=1, step_size=0.5):
     samples = [initial_position]
     momenta = np.random.normal(0,1,[n_samples, initial_position.shape[0]])
@@ -13,8 +17,7 @@ def hamiltonian_MCMC(n_samples, dVdq,initial_position, path_length=1, step_size=
             samples.append(np.copy(samples[-1]))
     return np.array(samples([1:]))
 
-
-# theis is the key is figuring out the leapfrog integrator
+#This is a symplectic integrator which is guaranteed to respect conserved quantities within a numerical tolerance.
 def leapfrog_integrator(q,p, dVdq, path_len, step_size):
     q,p = np.copy(q), np.copy(p)
     p -= step_size * dVdq(q) / 2 #so the gradient DOES change at every step. This is important to note.
